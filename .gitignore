@@ -1,0 +1,25 @@
+# Project exclude paths
+/.gradle/
+/Contacts/task/build/
+/Contacts/task/out/
+/Contacts/task/out/production/classes/
+/Topics/Builder/Builder/out/
+/Topics/Builder/Builder/out/production/classes/
+/Topics/Match results/Extracting big numbers from a text/out/
+/Topics/Match results/Extracting big numbers from a text/out/production/classes/
+/Topics/Match results/Find all passwords/out/
+/Topics/Match results/Find all passwords/out/production/classes/
+/Topics/Patterns and Matcher/Find a word with a given length/out/
+/Topics/Patterns and Matcher/Find a word with a given length/out/production/classes/
+/Topics/Patterns and Matcher/In the middle of a word/out/
+/Topics/Patterns and Matcher/In the middle of a word/out/production/classes/
+/Topics/Patterns and Matcher/Start or end of a word/out/
+/Topics/Patterns and Matcher/Start or end of a word/out/production/classes/
+/Topics/Regexes in programs/Check IP address/out/
+/Topics/Regexes in programs/Check IP address/out/production/classes/
+/Topics/Regexes in programs/Check the clock time/out/
+/Topics/Regexes in programs/Check the clock time/out/production/classes/
+/Topics/Regexes in programs/Illegal identifiers/out/
+/Topics/Regexes in programs/Illegal identifiers/out/production/classes/
+/Topics/Regexes in programs/Vehicle registration number/out/
+/Topics/Regexes in programs/Vehicle registration number/out/production/classes/
