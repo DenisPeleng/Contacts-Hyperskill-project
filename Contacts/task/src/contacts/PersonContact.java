@@ -2,6 +2,8 @@ package contacts;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 
 public class PersonContact extends Contact {
     private String surname = "";
@@ -9,9 +11,10 @@ public class PersonContact extends Contact {
     private String gender = "";
 
     PersonContact() {
+        List<String> fieldsToEdit = getListOfFields();
+        fieldsToEdit.addAll(Arrays.asList("surname", "birth", "gender"));
         setCreationTime(LocalDateTime.now());
         setLastEditTime(getCreationTime());
-        setPerson(true);
     }
 
     public String getSurname() {
@@ -54,7 +57,8 @@ public class PersonContact extends Contact {
         }
     }
 
-    public void printPersonInfo() {
+    @Override
+    public void printInfo() {
         System.out.printf("Name: %s\n", getName());
         System.out.printf("Surname: %s\n", getSurname());
         System.out.printf("Birth date: %s\n", getBirthDate());
@@ -63,10 +67,35 @@ public class PersonContact extends Contact {
         System.out.printf("Time created: %s\n", getCreationTime());
         System.out.printf("Time last edit: %s\n", getLastEditTime());
     }
+
+    @Override
+    public void changeValue(String fieldName, String newValue) {
+        switch (fieldName.toLowerCase()) {
+            case "name" -> setName(newValue);
+            case "surname" -> setSurname(newValue);
+            case "number" -> setPhoneNumber(newValue);
+            case "birth" -> setBirthDate(newValue);
+            case "gender" -> setGender(newValue);
+            default -> System.out.println("Wrong command");
+        }
+    }
+
+    @Override
+    public String getValue(String fieldName) {
+        return switch (fieldName.toLowerCase()) {
+            case "name" -> getName();
+            case "surname" -> getSurname();
+            case "number" -> getPhoneNumber();
+            case "birth" -> getBirthDate();
+            case "gender" -> getGender();
+            default -> "Wrong command";
+        };
+    }
+
     @Override
     public String toString() {
-
         return String.format("%s %s ", getName(), getSurname());
     }
+
 }
 

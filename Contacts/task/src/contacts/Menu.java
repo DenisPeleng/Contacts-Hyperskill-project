@@ -1,48 +1,82 @@
 package contacts;
 
+import java.util.List;
 import java.util.Scanner;
 
 public class Menu {
     private static final Scanner scanner = new Scanner(System.in);
 
     public static void startMenu() {
-        boolean isMenuWorking = true;
-        while (isMenuWorking) {
-            System.out.print("Enter action (add, remove, edit, count, info, exit):");
-            String command = scanner.nextLine();
-            switch (command) {
-                case "add" -> menuAddContact();
-                case "remove" -> menuRemoveContact();
-                case "edit" -> menuEditContact();
-                case "count" -> System.out.printf("The Phone Book has %d records.\n\n", PhoneBook.contactsCount());
-                case "info" -> menuInfoContacts();
-                case "exit" -> isMenuWorking = false;
-                default -> System.out.println("Wrong command");
+
+        System.out.print("[menu] Enter action (add, list, search, count, exit):");
+        String command = scanner.nextLine();
+        switch (command) {
+            case "add" -> menuAddContact();
+            case "list" -> printContactsList();
+            case "search" -> doSearch();
+            case "count" -> System.out.printf("The Phone Book has %d records.\n\n", PhoneBook.contactsCount());
+            case "exit" -> System.exit(0);
+            default -> {
+                System.out.println("Wrong command\n");
+                startMenu();
             }
         }
     }
 
-    private static void menuInfoContacts() {
-        if (PhoneBook.contactsCount() < 1) {
-            System.out.println("No records to remove!");
+    private static void doSearch() {
+        System.out.println("Enter search query:");
+        String textToSearch = scanner.nextLine();
+        List<Contact> foundedContacts = PhoneBook.searchContact(textToSearch);
+        if (foundedContacts.size() > 0) {
+            System.out.printf("Found %d results:\n", foundedContacts.size());
+            for (int i = 0; i < foundedContacts.size(); i++) {
+                System.out.printf("%d. %s\n", i + 1, foundedContacts.get(i).toString());
+            }
+            System.out.println();
+            menuSearchContact(foundedContacts);
         } else {
-            PhoneBook.printContactList();
-            System.out.println("Select a record:");
-            int numberOfRecord = Integer.parseInt(scanner.nextLine());
-            Contact contact = PhoneBook.getContact(numberOfRecord);
-            if (contact.isPerson()) {
-                PersonContact contactForInfo = (PersonContact) contact;
-                contactForInfo.printPersonInfo();
-            } else {
-                OrganizationContact contactForInfo = (OrganizationContact) contact;
-                contactForInfo.printOrganizationInfo();
+            System.out.println("Nothing founded!\n");
+            startMenu();
+        }
+
+    }
+
+    private static void menuSearchContact(List<Contact> foundedContacts) {
+        System.out.print("[search] Enter action ([number], back, again):");
+        String command = scanner.nextLine();
+        switch (command) {
+            case "again" -> doSearch();
+            case "back" -> startMenu();
+            default -> {
+                Contact contactByNumber = getContactByNumber(command, foundedContacts.size());
+                if (contactByNumber != null) {
+                    contactByNumber.printInfo();
+                    System.out.println();
+                    menuRecord(contactByNumber);
+                } else {
+                    System.out.println("Error command");
+                    menuSearchContact(foundedContacts);
+                }
             }
         }
-        System.out.println();
+    }
+
+    private static Contact getContactByNumber(String number, int contactListSize) {
+        Contact contactByNumber = null;
+        int numberOfRecord = -1;
+        try {
+            numberOfRecord = Integer.parseInt(number);
+        } catch (Exception ex) {
+            System.out.println("Wrong command");
+        }
+        if (numberOfRecord > 0 && numberOfRecord <= contactListSize) {
+            contactByNumber = PhoneBook.getContact(numberOfRecord);
+        }
+        return contactByNumber;
     }
 
     private static void menuAddContact() {
-        System.out.println("Enter the type (person, organization):");
+        System.out.print("Enter the type (person, organization):");
         String typeContact = scanner.nextLine();
         Contact newContact;
         newContact = switch (typeContact) {
@@ -50,10 +84,14 @@ public class Menu {
             case "organization" -> newOrganizationContact();
             default -> null;
         };
-        PhoneBook.addContact(newContact);
-        System.out.println("The record added.");
-        System.out.println();
+        if (newContact == null) {
+            System.out.println("Error\n");
 
+        } else {
+            PhoneBook.addContact(newContact);
+            System.out.println("The record added.\n");
+        }
+        startMenu();
     }
 
     private static Contact newPersonContact() {
@@ -90,93 +128,66 @@ public class Menu {
         return newOrganizationContact;
     }
 
-    private static void menuRemoveContact() {
-        if (PhoneBook.contactsCount() < 1) {
-            System.out.println("No records to remove!");
-        } else {
-            PhoneBook.printContactList();
-            System.out.println("Select a record:");
-            int numberOfRecord = Integer.parseInt(scanner.nextLine());
-            PhoneBook.removeRecord(numberOfRecord);
-            System.out.println("The record removed!");
-        }
+    private static void menuRemoveContact(Contact contact) {
+        PhoneBook.removeContact(contact);
+        System.out.println("Removed!");
         System.out.println();
     }
 
-    private static void menuEditContact() {
+    private static void printContactsList() {
         if (PhoneBook.contactsCount() < 1) {
-            System.out.println("No records to edit!");
+            System.out.println("No records!");
         } else {
             PhoneBook.printContactList();
-            System.out.println("Select a record:");
-            int numberOfRecord = Integer.parseInt(scanner.nextLine());
-            Contact oldContact = PhoneBook.getContact(numberOfRecord);
-            Contact newContact;
-            if (oldContact.isPerson()) {
-                newContact = editPersonContact((PersonContact) oldContact);
-            } else {
-                newContact = editOrganizationContact((OrganizationContact) oldContact);
-            }
-
-            PhoneBook.editRecord(numberOfRecord, newContact);
-            System.out.println("The record updated!");
+            System.out.println();
+            menuList();
         }
-        System.out.println();
     }
 
-    private static Contact editPersonContact(PersonContact oldContact) {
-        System.out.println("Select a field (name, surname, birth, gender, number):");
+    private static void menuList() {
+        System.out.print("[list] Enter action ([number], back):\n");
+        String command = scanner.nextLine();
+        switch (command) {
+            case "again" -> doSearch();
+            case "back" -> startMenu();
+            default -> {
+                Contact contactByNumber = getContactByNumber(command, PhoneBook.contactsCount());
+                if (contactByNumber != null) {
+                    contactByNumber.printInfo();
+                    System.out.println();
+                    menuRecord(contactByNumber);
+                } else {
+                    System.out.println("Wrong command");
+                    menuList();
+                }
+            }
+        }
+    }
+
+    private static void menuRecord(Contact contact) {
+        System.out.println("[record] Enter action (edit, delete, menu):");
+        String command = scanner.nextLine();
+        switch (command) {
+            case "edit" -> menuEditContact(contact);
+            case "delete" -> menuRemoveContact(contact);
+            case "menu" -> startMenu();
+            default -> menuRecord(contact);
+        }
+    }
+
+    private static void menuEditContact(Contact contact) {
+        System.out.printf("Select a field %s:\n", contact.getFullStrOfFields());
         String rowToEdit = scanner.nextLine();
-
-        switch (rowToEdit) {
-            case "name" -> {
-                System.out.println("Enter name:");
-                String name = scanner.nextLine();
-                oldContact.setName(name);
-            }
-            case "surname" -> {
-                System.out.println("Enter surname");
-                String surname = scanner.nextLine();
-                oldContact.setSurname(surname);
-            }
-            case "number" -> {
-                System.out.println("Enter number:");
-                String number = scanner.nextLine();
-                oldContact.setPhoneNumber(number);
-            }
-            case "birth" -> {
-                System.out.println("Enter birth:");
-                String birthDate = scanner.nextLine();
-                oldContact.setBirthDate(birthDate);
-            }
-            case "gender" -> {
-                System.out.println("Enter gender:");
-                String gender = scanner.nextLine();
-                oldContact.setGender(gender);
-            }
-            default -> System.out.println("Wrong command");
+        if (contact.getFullStrOfFields().contains(rowToEdit.toLowerCase())) {
+            System.out.printf("Enter %s:\n", rowToEdit);
+            String newValue = scanner.nextLine();
+            PhoneBook.removeContact(contact);
+            contact.changeValue(rowToEdit, newValue);
+            PhoneBook.editRecord(contact);
+            System.out.println("Saved");
+        } else {
+            System.out.println("Wrong command");
         }
-        return oldContact;
+        menuRecord(contact);
     }
-
-    private static Contact editOrganizationContact(OrganizationContact oldContact) {
-        System.out.println("Select a field (address, number):");
-        String rowToEdit = scanner.nextLine();
-        switch (rowToEdit) {
-            case "address" -> {
-                System.out.println("Enter address:");
-                String address = scanner.nextLine();
-                oldContact.setAddress(address);
-            }
-            case "number" -> {
-                System.out.println("Enter number:");
-                String number = scanner.nextLine();
-                oldContact.setPhoneNumber(number);
-            }
-            default -> System.out.println("Wrong command");
-        }
-        return oldContact;
-    }
-
-
 }

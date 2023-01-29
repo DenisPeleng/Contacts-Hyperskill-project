@@ -1,15 +1,34 @@
 package contacts;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Contact {
+public abstract class Contact implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+    private List<String> listOfFields;
     private String name;
     private String phoneNumber;
     private LocalDateTime creationTime;
     private LocalDateTime lastEditTime;
-    private boolean isPerson;
+
+    protected Contact() {
+        listOfFields = new ArrayList<>(Arrays.asList("name", "number"));
+    }
+
+    public List<String> getListOfFields() {
+        return listOfFields;
+    }
+
+    public void setListOfFields(List<String> listOfFields) {
+        this.listOfFields = listOfFields;
+    }
 
     public String getName() {
         return name;
@@ -50,12 +69,21 @@ public class Contact {
         this.lastEditTime = lastEditTime;
     }
 
-    public boolean isPerson() {
-        return isPerson;
-    }
+    public abstract void printInfo();
 
-    public void setPerson(boolean person) {
-        isPerson = person;
-    }
+    public abstract void changeValue(String fieldName, String newValue);
 
+    public abstract String getValue(String fieldName);
+
+    public String getFullStrOfFields() {
+        return listOfFields.toString().replace("[", "(").replace("]", ")");
+    }
+    public String toFullString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (String value : getListOfFields()
+        ) {
+            stringBuilder.append(getValue(value)).append(" ");
+        }
+        return stringBuilder.toString();
+    }
 }
